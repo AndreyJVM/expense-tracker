@@ -11,25 +11,36 @@ public class ExpenseResponse {
     private LocalDate date;
     private String description;
     private String category;
+    private boolean recurring;
+    private Integer frequencyDays;
 
     public ExpenseResponse() {
     }
 
-    public ExpenseResponse(Integer id, BigDecimal amount, LocalDate date, String description, String category) {
+    public ExpenseResponse(Integer id, BigDecimal amount, LocalDate date, String description,
+            String category, boolean recurring, Integer frequencyDays) {
         this.id = id;
         this.amount = amount;
         this.date = date;
         this.description = description;
         this.category = category;
+        this.recurring = recurring;
+        this.frequencyDays = frequencyDays;
     }
 
     public static ExpenseResponse from(Expense expense) {
+        boolean isRecurring = expense.getRecurringExpense() != null
+                && expense.getRecurringExpense().isActive();
+        Integer freq = isRecurring ? expense.getRecurringExpense().getFrequencyDays() : null;
+
         return new ExpenseResponse(
                 expense.getId(),
                 expense.getAmount(),
                 expense.getDate(),
                 expense.getDescription(),
-                expense.getCategory() != null ? expense.getCategory().getName() : null);
+                expense.getCategory() != null ? expense.getCategory().getName() : null,
+                isRecurring,
+                freq);
     }
 
     public Integer getId() {
@@ -72,4 +83,19 @@ public class ExpenseResponse {
         this.category = category;
     }
 
+    public boolean getRecurring() {
+        return recurring;
+    }
+
+    public void setRecurring(boolean recurring) {
+        this.recurring = recurring;
+    }
+
+    public Integer getFrequencyDays() {
+        return frequencyDays;
+    }
+
+    public void setFrequencyDays(Integer frequencyDays) {
+        this.frequencyDays = frequencyDays;
+    }
 }

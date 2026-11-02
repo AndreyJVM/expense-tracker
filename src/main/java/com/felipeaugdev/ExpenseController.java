@@ -79,10 +79,14 @@ public class ExpenseController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ExpenseResponse addExpense(@Valid @RequestBody ExpenseCreateRequest expense) {
+    public ExpenseResponse addExpense(@Valid @RequestBody ExpenseCreateRequest request) {
         Expense saved = expenseService.addExpense(
-                expense.getAmount(), expense.getDescription(),
-                expense.getCategory(), getCurrentUser());
+                request.getAmount(),
+                request.getDescription(),
+                request.getCategory(),
+                getCurrentUser(),
+                request.isRecurring(),
+                request.getFrequencyDays());
         return ExpenseResponse.from(saved);
     }
 

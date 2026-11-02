@@ -30,6 +30,10 @@ public class Expense {
     @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recurring_expense_id")
+    private RecurringExpense recurringExpense;
+
     // --- CONSTRUCTORS ---
 
     public Expense() {
@@ -107,5 +111,13 @@ public class Expense {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public RecurringExpense getRecurringExpense() {
+        return recurringExpense;
+    }
+
+    public void setRecurringExpense(RecurringExpense recurringExpense) {
+        this.recurringExpense = recurringExpense;
     }
 }
