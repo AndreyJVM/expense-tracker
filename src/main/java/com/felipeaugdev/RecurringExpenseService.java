@@ -47,6 +47,9 @@ public class RecurringExpenseService {
      */
     @Transactional
     public void deactivate(Long id, User currentUser) {
+        if (id == null)
+            return;
+
         recurringRepository.findById(id).ifPresent(template -> {
             if (currentUser == null && template.getUser() != null)
                 return;

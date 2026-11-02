@@ -21,18 +21,41 @@ public class ExpenseService {
 
     private final ExpenseRepository repository;
     private final CategoryRepository categoryRepository;
+    private final RecurringExpenseService recurringExpenseService;
 
-    public ExpenseService(ExpenseRepository repository, CategoryRepository categoryRepository) {
+    public ExpenseService(ExpenseRepository repository,
+            CategoryRepository categoryRepository,
+            RecurringExpenseService recurringExpenseService) {
+
         this.repository = repository;
         this.categoryRepository = categoryRepository;
+        this.recurringExpenseService = recurringExpenseService;
     }
 
-    public Expense addExpense(BigDecimal amount, String description, String categoryName, User user) {
+    public Expense addExpense(BigDecimal amount, String description, String categoryName,
+            User user, boolean recurring, Integer frequencyDays) {
+
         Category category = categoryRepository.findByName(categoryName)
                 .orElseThrow(() -> new RuntimeException("Category not found: " + categoryName));
 
         Expense newExpense = new Expense(amount, LocalDate.now(), description, category, user);
-        return repository.save(newExpense);
+        Expense saved = repository.save(newExpense);
+
+        if (recurring && frequencyDays != null && frequencyDays > 0) {
+            RecurringExpense template = new RecurringExpense(
+                    amount,
+                    description,
+                    category,
+                    frequencyDays,
+                    LocalDate.now().plusDays(frequencyDays),
+                    user);
+            template = recurringExpenseService.create(template);
+
+            saved.setRecurringExpense(template);
+            saved = repository.save(saved);
+        }
+
+        return saved;
     }
 
     public List<Expense> getAllExpenses(User user) {
@@ -76,6 +99,34 @@ public class ExpenseService {
                     .orElseThrow(() -> new RuntimeException("Category not found: " + request.getCategory()));
 
             expense.setCategory(category);
+        }
+
+        if (request.getRecurring() != null) {
+            if (request.getRecurring()) {
+                int freq = request.getFrequencyDays() != null ? request.getFrequencyDays() : 30;
+
+                RecurringExpense template = expense.getRecurringExpense();
+                if (template == null) {
+                    template = new RecurringExpense(
+                            expense.getAmount(),
+                            expense.getDescription(),
+                            expense.getCategory(),
+                            freq,
+                            LocalDate.now().plusDays(freq),
+                            currentUser);
+                    template = recurringExpenseService.create(template);
+                    expense.setRecurringExpense(template);
+                } else {
+                    template.setFrequencyDays(freq);
+                    template.setActive(true);
+                }
+            } else {
+                if (expense.getRecurringExpense() != null) {
+                    recurringExpenseService.deactivate(
+                            expense.getRecurringExpense().getId(), currentUser);
+                    expense.setRecurringExpense(null);
+                }
+            }
         }
 
         return repository.save(Objects.requireNonNull(expense));

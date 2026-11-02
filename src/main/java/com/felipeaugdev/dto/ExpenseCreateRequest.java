@@ -20,6 +20,9 @@ public class ExpenseCreateRequest {
     @NotBlank(message = "Category is required")
     private String category;
 
+    private boolean recurring = false;
+    private Integer frequencyDays;
+
     // GETTERS & SETTERS
     public BigDecimal getAmount() {
         return amount;
@@ -43,5 +46,21 @@ public class ExpenseCreateRequest {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public boolean isRecurring() {
+        return recurring;
+    }
+
+    public void setRecurring(boolean recurring) {
+        this.recurring = recurring;
+    }
+
+    public Integer getFrequencyDays() {
+        return frequencyDays;
+    }
+
+    public void setFrequencyDays(Integer frequencyDays) {
+        this.frequencyDays = frequencyDays;
     }
 }
