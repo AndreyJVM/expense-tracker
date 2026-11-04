@@ -318,6 +318,19 @@ document.addEventListener("DOMContentLoaded", () => {
     .getElementById("add-budget-btn")
     ?.addEventListener("click", handleAddBudget);
 
+  document
+    .getElementById("recurring-checkbox")
+    ?.addEventListener("change", (e) => {
+      document.getElementById("frequency-select").disabled = !e.target.checked;
+    });
+
+  document
+    .getElementById("edit-recurring-checkbox")
+    ?.addEventListener("change", (e) => {
+      document.getElementById("edit-frequency-select").disabled =
+        !e.target.checked;
+    });
+
   updateAuthUI();
 });
 
@@ -591,9 +604,16 @@ async function loadTransactions(days = "", append = false) {
         exp.category.charAt(0).toUpperCase() +
           exp.category.slice(1).toLowerCase();
 
+      const recurringIcon = exp.recurring
+        ? `<svg class="w-3.5 h-3.5 inline-block ml-1 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>`
+        : "";
+
       tr.innerHTML = `
         <td class="py-3 font-mono text-xs text-slate-500 dark:text-slate-400">${formatDate(exp.date) || "N/A"}</td>
-        <td class="py-3 font-medium text-slate-800 dark:text-slate-200">${exp.description}</td>
+        <td class="py-3 font-medium text-slate-800 dark:text-slate-200">${exp.description} ${recurringIcon}</td>
         <td class="py-3">
           <span class="px-2 py-1 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
             ${localizedCategory}
@@ -651,6 +671,10 @@ async function handleAddExpense(e) {
   const amount = parseAmount(rawAmount);
   const category = document.getElementById("category").value;
   const description = document.getElementById("description").value;
+  const recurring = document.getElementById("recurring-checkbox").checked;
+  const frequencyDays = recurring
+    ? Number(document.getElementById("frequency-select").value)
+    : null;
 
   if (amount === null || amount <= 0) {
     alert(dict.invalidAmount);
@@ -661,7 +685,13 @@ async function handleAddExpense(e) {
     const response = await fetch(API_BASE_URL, {
       method: "POST",
       headers: getAuthHeaders(),
-      body: JSON.stringify({ amount, category, description }),
+      body: JSON.stringify({
+        amount,
+        category,
+        description,
+        recurring,
+        frequencyDays,
+      }),
     });
 
     if (!response.ok) throw new Error("Failed to create expense");
@@ -890,6 +920,15 @@ function openEditModal(expense) {
   document.getElementById("edit-description").value = expense.description;
   document.getElementById("edit-date").value = expense.date;
 
+  const recurringCheckbox = document.getElementById("edit-recurring-checkbox");
+  const frequencySelect = document.getElementById("edit-frequency-select");
+
+  recurringCheckbox.checked = expense.recurring === true;
+  frequencySelect.disabled = !expense.recurring;
+  if (expense.frequencyDays) {
+    frequencySelect.value = expense.frequencyDays;
+  }
+
   const modal = document.getElementById("edit-modal");
   modal.classList.remove("hidden");
   modal.classList.add("flex");
@@ -910,6 +949,10 @@ async function handleEditSubmit(e) {
   const category = document.getElementById("edit-category").value;
   const description = document.getElementById("edit-description").value;
   const date = document.getElementById("edit-date").value;
+  const recurring = document.getElementById("edit-recurring-checkbox").checked;
+  const frequencyDays = recurring
+    ? Number(document.getElementById("edit-frequency-select").value)
+    : null;
 
   if (amount === null || amount <= 0) {
     alert(TRANSLATIONS[currentLang].invalidAmount);
@@ -920,7 +963,14 @@ async function handleEditSubmit(e) {
     const response = await fetch(`${API_BASE_URL}/${id}`, {
       method: "PUT",
       headers: getAuthHeaders(),
-      body: JSON.stringify({ amount, category, description, date }),
+      body: JSON.stringify({
+        amount,
+        category,
+        description,
+        date,
+        recurring,
+        frequencyDays,
+      }),
     });
 
     if (!response.ok) throw new Error("Failed to update expense");

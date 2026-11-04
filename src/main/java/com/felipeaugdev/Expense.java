@@ -30,7 +30,7 @@ public class Expense {
     @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "recurring_expense_id")
     private RecurringExpense recurringExpense;
 
