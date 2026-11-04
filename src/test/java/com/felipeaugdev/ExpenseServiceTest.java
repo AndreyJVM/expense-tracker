@@ -38,7 +38,7 @@ public class ExpenseServiceTest {
         when(categoryRepository.findByName("FOOD")).thenReturn(Optional.of(food));
         when(repository.save(any(Expense.class))).thenReturn(sample);
 
-        Expense created = service.addExpense(new BigDecimal("5.50"), "Coffee", "FOOD", null);
+        Expense created = service.addExpense(new BigDecimal("5.50"), "Coffee", "FOOD", null, false, null);
 
         assertNotNull(created);
         assertEquals("Coffee", created.getDescription());

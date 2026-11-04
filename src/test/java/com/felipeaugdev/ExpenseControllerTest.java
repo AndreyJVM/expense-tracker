@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -66,7 +67,8 @@ class ExpenseControllerTest {
         @Test
         void testAddExpenseReturnsCreatedStatus() throws Exception {
                 Expense expense = new Expense(new BigDecimal("25.50"), LocalDate.now(), "Dinner", food);
-                when(expenseService.addExpense(any(BigDecimal.class), eq("Dinner"), eq("FOOD"), any()))
+                when(expenseService.addExpense(any(BigDecimal.class), eq("Dinner"),
+                                eq("FOOD"), any(), anyBoolean(), any()))
                                 .thenReturn(expense);
 
                 ExpenseCreateRequest request = new ExpenseCreateRequest();
