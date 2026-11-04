@@ -81,6 +81,7 @@ public class RecurringExpenseService {
                     template.getDescription(),
                     template.getCategory(),
                     template.getUser());
+            expense.setRecurringExpense(template);
             expenseRepository.save(expense);
 
             LocalDate next = template.getNextOccurrenceDate()
