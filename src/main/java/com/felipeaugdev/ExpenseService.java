@@ -119,6 +119,11 @@ public class ExpenseService {
                 } else {
                     template.setFrequencyDays(freq);
                     template.setActive(true);
+
+                    template.setAmount(expense.getAmount());
+                    template.setDescription(expense.getDescription());
+                    template.setCategory(expense.getCategory());
+                    recurringExpenseService.create(template);
                 }
             } else {
                 if (expense.getRecurringExpense() != null) {
