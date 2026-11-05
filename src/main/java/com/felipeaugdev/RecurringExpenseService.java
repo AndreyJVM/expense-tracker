@@ -2,6 +2,7 @@ package com.felipeaugdev;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,14 @@ public class RecurringExpenseService {
         }
         template.setActive(true);
         return recurringRepository.save(template);
+    }
+
+    /**
+     * Updates a recurring template.
+     */
+    @Transactional
+    public RecurringExpense update(RecurringExpense template) {
+        return recurringRepository.save(Objects.requireNonNull(template));
     }
 
     /**
