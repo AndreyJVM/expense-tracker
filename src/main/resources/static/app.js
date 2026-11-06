@@ -86,6 +86,7 @@ const TRANSLATIONS = {
     cancel: "Cancel",
     mustBeLoggedInCategory: "You must be logged in to create a category",
     enterCategoryName: "Please enter a category name",
+    stopRecurringConfirm: "Also stop the recurring series?",
   },
   pt: {
     title: "Controle de Despesas",
@@ -161,6 +162,7 @@ const TRANSLATIONS = {
     mustBeLoggedInCategory:
       "Você precisa estar logado para criar uma categoria",
     enterCategoryName: "Por favor, digite o nome da categoria",
+    stopRecurringConfirm: "Também deseja encerrar a despesa recorrente?",
   },
 };
 
@@ -705,10 +707,24 @@ async function handleAddExpense(e) {
 
 async function deleteExpense(id) {
   const dict = TRANSLATIONS[currentLang];
-  if (!confirm(dict.deleteConfirm)) return;
+  const expense = loadedExpenses.find((e) => e.id === id);
+
+  let stopRecurring = false;
+
+  if (expense && expense.recurring) {
+    stopRecurring = confirm(
+      dict.stopRecurringConfirm || "Also stop the recurring series?",
+    );
+  } else {
+    if (!confirm(dict.deleteConfirm)) return;
+  }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
+    const url = stopRecurring
+      ? `${API_BASE_URL}/${id}?stopRecurring=true`
+      : `${API_BASE_URL}/${id}`;
+
+    const response = await fetch(url, {
       method: "DELETE",
       headers: getAuthHeaders(),
     });

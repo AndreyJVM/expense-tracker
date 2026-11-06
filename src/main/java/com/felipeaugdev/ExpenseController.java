@@ -100,8 +100,11 @@ public class ExpenseController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpense(@PathVariable int id) {
-        boolean deleted = expenseService.deleteExpense(id, getCurrentUser());
+    public ResponseEntity<Void> deleteExpense(
+            @PathVariable int id,
+            @RequestParam(defaultValue = "false") boolean stopRecurring) {
+
+        boolean deleted = expenseService.deleteExpense(id, getCurrentUser(), stopRecurring);
         if (deleted) {
             return ResponseEntity.noContent().build();
         }
