@@ -137,10 +137,13 @@ public class ExpenseService {
         return repository.save(Objects.requireNonNull(expense));
     }
 
-    public boolean deleteExpense(int id, User user) {
+    public boolean deleteExpense(int id, User user, boolean stopRecurring) {
         return repository.findById(id)
                 .filter(expense -> belongsToUser(expense, user))
                 .map(expense -> {
+                    if (stopRecurring && expense.getRecurringExpense() != null) {
+                        recurringExpenseService.deactivate(expense.getRecurringExpense().getId(), user);
+                    }
                     repository.delete(Objects.requireNonNull(expense));
                     return true;
                 })
