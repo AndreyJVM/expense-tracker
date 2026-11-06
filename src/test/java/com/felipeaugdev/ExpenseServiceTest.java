@@ -62,7 +62,7 @@ public class ExpenseServiceTest {
         Expense expense = new Expense(new BigDecimal("10.00"), LocalDate.now(), "Test", food);
         when(repository.findById(1)).thenReturn(java.util.Optional.of(expense));
 
-        boolean deleted = service.deleteExpense(1, null);
+        boolean deleted = service.deleteExpense(1, null, false);
 
         assertTrue(deleted);
         verify(repository).delete(expense);
@@ -72,7 +72,7 @@ public class ExpenseServiceTest {
     void testDeleteNonExistentExpenseReturnsFalse() {
         when(repository.findById(999)).thenReturn(java.util.Optional.empty());
 
-        boolean deleted = service.deleteExpense(999, null);
+        boolean deleted = service.deleteExpense(999, null, false);
 
         assertFalse(deleted);
         verify(repository, never()).delete(any());
