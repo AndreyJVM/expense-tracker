@@ -85,7 +85,7 @@ class ExpenseControllerTest {
 
         @Test
         void testDeleteExpenseExistingReturnsNoContent() throws Exception {
-                when(expenseService.deleteExpense(eq(1), any(), false)).thenReturn(true);
+                when(expenseService.deleteExpense(eq(1), any(), anyBoolean())).thenReturn(true);
 
                 mockMvc.perform(delete("/api/expenses/1"))
                                 .andExpect(status().isNoContent());
@@ -93,7 +93,7 @@ class ExpenseControllerTest {
 
         @Test
         void testDeleteExpenseNotFoundReturns404() throws Exception {
-                when(expenseService.deleteExpense(eq(999), any(), false)).thenReturn(false);
+                when(expenseService.deleteExpense(eq(999), any(), anyBoolean())).thenReturn(false);
 
                 mockMvc.perform(delete("/api/expenses/999"))
                                 .andExpect(status().isNotFound());
