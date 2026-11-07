@@ -88,6 +88,10 @@ const TRANSLATIONS = {
     cancel: "Cancel",
     mustBeLoggedInCategory: "You must be logged in to create a category",
     enterCategoryName: "Please enter a category name",
+    repeatEvery: "Repeat every",
+    days7: "7 days",
+    days14: "14 days",
+    days30: "30 days",
   },
   pt: {
     title: "Controle de Despesas",
@@ -165,6 +169,10 @@ const TRANSLATIONS = {
     mustBeLoggedInCategory:
       "Você precisa estar logado para criar uma categoria",
     enterCategoryName: "Por favor, digite o nome da categoria",
+    repeatEvery: "Repetir a cada",
+    days7: "7 dias",
+    days14: "14 dias",
+    days30: "30 dias",
   },
 };
 
