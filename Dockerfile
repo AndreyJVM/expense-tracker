@@ -1,4 +1,3 @@
-
 FROM maven:3.9.9-eclipse-temurin-21-alpine AS builder
 WORKDIR /app
 COPY pom.xml .
@@ -7,7 +6,11 @@ RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=builder /app/target/expense-tracker-1.0-SNAPSHOT.jar app.jar
+
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+
+COPY --from=builder --chown=spring:spring /app/target/expense-tracker-1.0-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
