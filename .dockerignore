@@ -1,0 +1,33 @@
+# Git
+.git
+.gitignore
+
+# Docker
+.dockerignore
+Dockerfile*
+docker-compose*.yml
+
+# Maven build artifacts
+target/
+
+# IDE and Editor files
+.idea/
+*.iml
+.vscode/
+
+# Documentation and assets
+README.md
+NOTES.md
+screenshots/
+
+# Scripts
+start.sh
+start.bat
+
+# Logs and local files
+*.log
+expenses.csv
+
+# OS metadata
+.DS_Store
+Thumbs.db
