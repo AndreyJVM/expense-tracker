@@ -41,6 +41,8 @@ const TRANSLATIONS = {
     noTransactions: "No transactions found",
     deleteBtn: "Delete",
     deleteConfirm: "Are you sure you want to delete this expense?",
+    stopRecurringConfirm:
+      "This expense repeats every {n} days.\nDo you also want to stop future occurrences?",
     invalidAmount:
       "Please enter a valid positive amount (e.g. 5.99 or 1234.56)",
     categories: {
@@ -86,7 +88,6 @@ const TRANSLATIONS = {
     cancel: "Cancel",
     mustBeLoggedInCategory: "You must be logged in to create a category",
     enterCategoryName: "Please enter a category name",
-    stopRecurringConfirm: "Also stop the recurring series?",
   },
   pt: {
     title: "Controle de Despesas",
@@ -115,6 +116,8 @@ const TRANSLATIONS = {
     noTransactions: "Nenhuma transação encontrada",
     deleteBtn: "Excluir",
     deleteConfirm: "Tem certeza de que deseja excluir esta despesa?",
+    stopRecurringConfirm:
+      "Esta despesa se repete a cada {n} dias.\nTambém deseja encerrar as próximas ocorrências?",
     invalidAmount:
       "Por favor, insira um valor positivo válido (ex: 5,99 ou 1234,56)",
     categories: {
@@ -162,7 +165,6 @@ const TRANSLATIONS = {
     mustBeLoggedInCategory:
       "Você precisa estar logado para criar uma categoria",
     enterCategoryName: "Por favor, digite o nome da categoria",
-    stopRecurringConfirm: "Também deseja encerrar a despesa recorrente?",
   },
 };
 
@@ -709,14 +711,15 @@ async function deleteExpense(id) {
   const dict = TRANSLATIONS[currentLang];
   const expense = loadedExpenses.find((e) => e.id === id);
 
-  let stopRecurring = false;
+  if (!confirm(dict.deleteConfirm)) return;
 
+  let stopRecurring = false;
   if (expense && expense.recurring) {
-    stopRecurring = confirm(
-      dict.stopRecurringConfirm || "Also stop the recurring series?",
+    const message = (dict.stopRecurringConfirm || "").replace(
+      "{n}",
+      expense.frequencyDays || "?",
     );
-  } else {
-    if (!confirm(dict.deleteConfirm)) return;
+    stopRecurring = confirm(message);
   }
 
   try {
