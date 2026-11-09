@@ -6,6 +6,8 @@
 .dockerignore
 Dockerfile*
 docker-compose*.yml
+.env*
+!.env.example
 
 # Maven build artifacts
 target/
