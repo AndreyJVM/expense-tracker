@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.felipeaugdev.dto.BudgetResponse;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 public class BudgetServiceTest {
 
     @Mock
@@ -78,9 +79,8 @@ public class BudgetServiceTest {
 
     @Test
     void testCreateOrUpdateBudgetThrowsWhenUserIsNull() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                budgetService.createOrUpdateBudget(null, "FOOD", new BigDecimal("100.00"))
-        );
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> budgetService.createOrUpdateBudget(null, "FOOD", new BigDecimal("100.00")));
         assertEquals("You must be logged in to set a budget", exception.getMessage());
     }
 
@@ -88,9 +88,8 @@ public class BudgetServiceTest {
     void testCreateOrUpdateBudgetThrowsWhenCategoryNotFound() {
         when(categoryRepository.findByName("UNKNOWN")).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                budgetService.createOrUpdateBudget(user, "UNKNOWN", new BigDecimal("100.00"))
-        );
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> budgetService.createOrUpdateBudget(user, "UNKNOWN", new BigDecimal("100.00")));
         assertTrue(exception.getMessage().contains("Category not found"));
     }
 
@@ -148,9 +147,7 @@ public class BudgetServiceTest {
     void testDeleteBudgetThrowsWhenNotFound() {
         when(budgetRepository.findById(999L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                budgetService.deleteBudget(user, 999L)
-        );
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> budgetService.deleteBudget(user, 999L));
         assertEquals("Budget not found", exception.getMessage());
         verify(budgetRepository, never()).delete(any());
     }
@@ -163,9 +160,7 @@ public class BudgetServiceTest {
 
         when(budgetRepository.findById(300L)).thenReturn(Optional.of(budget));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                budgetService.deleteBudget(user, 300L)
-        );
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> budgetService.deleteBudget(user, 300L));
         assertEquals("Access denied", exception.getMessage());
         verify(budgetRepository, never()).delete(any());
     }

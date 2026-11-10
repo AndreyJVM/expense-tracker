@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 public class CategorySeederTest {
 
     @Mock
@@ -38,8 +39,7 @@ public class CategorySeederTest {
 
         List<String> expectedNames = List.of(
                 "FOOD", "TRANSPORTATION", "UTILITIES", "HOUSING",
-                "ENTERTAINMENT", "HEALTHCARE", "SHOPPING", "OTHER"
-        );
+                "ENTERTAINMENT", "HEALTHCARE", "SHOPPING", "OTHER");
 
         assertEquals(expectedNames, savedNames);
     }
