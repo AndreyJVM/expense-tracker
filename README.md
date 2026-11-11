@@ -20,10 +20,11 @@ A full-stack personal expense tracking application with real-time analytics. Bui
 ## Features
 
 - **Web Dashboard:** Interactive single-page dashboard displaying real-time monthly metrics, spending category charts, and a transaction table.
-- **Expense Management:** Full CRUD operations for creating, viewing, and deleting expense records.
-- **Date Range Filtering:** Filter transactions by rolling time windows (e.g., last 7, 14, or 30 days).
+- **Expense Management:** Full CRUD operations for creating, viewing, editing, and deleting expense records.
+- **Date Range Filtering:** Filter transactions by rolling time windows (e.g., last 30, 14, or 7 days).
 - **Category Breakdown:** Aggregated spending totals grouped by expense category. Also supports custom categories (requires login).
 - **Month-over-Month Reports:** Comparative analysis between current and previous calendar month spending.
+- **Recurring Expenses:** Mark an expense as recurring (every 30, 14 or 7 days). Future occurrences are generated automatically. A small icon indicates recurring items in the transaction list.
 - **Optional User Accounts:** Register / login with JWT authentication. Expenses are isolated per user while guest mode remains fully functional.
 - **Monthly Budgets:** Set per-category spending limits, track progress with visual bars, and get warned when a limit is reached (requires login).
 - **Dockerized Environment:** Multi-stage Docker build packaging both Spring Boot backend and MariaDB database via Docker Compose.
@@ -55,6 +56,7 @@ A full-stack personal expense tracking application with real-time analytics. Bui
 | `GET`    | `/api/budgets`           | List budgets for the current user |
 | `POST`   | `/api/budgets`           | Create or update a budget |
 | `DELETE` | `/api/budgets/{id}`      | Delete a budget |
+| `POST`   | `/api/recurring/generate` | Manually trigger generation of due recurring expenses (for testing/development) |
 
 ### Authentication Endpoints
 | Method | Endpoint | Description |
