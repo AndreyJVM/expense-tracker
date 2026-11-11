@@ -40,47 +40,57 @@ public class BudgetServiceTest {
     @BeforeEach
     void setUp() {
         user = new User(1L, "john", "password", "USER");
-        category = new Category("FOOD");
-        category.setId(10L);
+        category = createCategory(10L, "FOOD");
+    }
+
+    private Category createCategory(Long id, String name) {
+        Category cat = new Category(name);
+        cat.setId(id);
+        return cat;
     }
 
     @Test
     void testGetBudgetsForUserReturnsEmptyWhenUserIsNull() {
         List<BudgetResponse> responses = budgetService.getBudgetsForUser(null);
+
         assertTrue(responses.isEmpty());
         verifyNoInteractions(budgetRepository);
     }
 
     @Test
     void testGetBudgetsForUserCalculatesSpentAndRemainingCorrectly() {
-        Budget budget = new Budget(user, category, new BigDecimal("100.00"));
+        BigDecimal limit = new BigDecimal("100.00");
+        BigDecimal spent = new BigDecimal("40.00");
+        BigDecimal remaining = new BigDecimal("60.00");
+
+        Budget budget = new Budget(user, category, limit);
         budget.setId(100L);
 
-        Category transport = new Category("TRANSPORTATION");
-        transport.setId(20L);
+        Category transport = createCategory(20L, "TRANSPORTATION");
+        Expense targetExpense = new Expense(spent, LocalDate.now(), "Groceries", category, user);
+        Expense otherCategoryExpense = new Expense(new BigDecimal("20.00"), LocalDate.now(), "Bus", transport, user);
 
-        Expense inCurrentMonth = new Expense(new BigDecimal("40.00"), LocalDate.now(), "Groceries", category, user);
-        Expense differentCategory = new Expense(new BigDecimal("20.00"), LocalDate.now(), "Bus", transport, user);
-
-        when(budgetRepository.findByUserId(1L)).thenReturn(List.of(budget));
-        when(expenseRepository.findAll()).thenReturn(List.of(inCurrentMonth, differentCategory));
+        when(budgetRepository.findByUserId(user.getId())).thenReturn(List.of(budget));
+        when(expenseRepository.findAll()).thenReturn(List.of(targetExpense, otherCategoryExpense));
 
         List<BudgetResponse> result = budgetService.getBudgetsForUser(user);
 
         assertEquals(1, result.size());
         BudgetResponse response = result.get(0);
-        assertEquals(100L, response.getId());
-        assertEquals("FOOD", response.getCategory());
-        assertEquals(new BigDecimal("100.00"), response.getLimit());
-        assertEquals(new BigDecimal("40.00"), response.getSpent());
-        assertEquals(new BigDecimal("60.00"), response.getRemaining());
+        assertEquals(budget.getId(), response.getId());
+        assertEquals(category.getName(), response.getCategory());
+        assertEquals(limit, response.getLimit());
+        assertEquals(spent, response.getSpent());
+        assertEquals(remaining, response.getRemaining());
         assertEquals(40.0, response.getPercentage());
     }
 
     @Test
     void testCreateOrUpdateBudgetThrowsWhenUserIsNull() {
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> budgetService.createOrUpdateBudget(null, "FOOD", new BigDecimal("100.00")));
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                budgetService.createOrUpdateBudget(null, "FOOD", new BigDecimal("100.00"))
+        );
+
         assertEquals("You must be logged in to set a budget", exception.getMessage());
     }
 
@@ -88,46 +98,51 @@ public class BudgetServiceTest {
     void testCreateOrUpdateBudgetThrowsWhenCategoryNotFound() {
         when(categoryRepository.findByName("UNKNOWN")).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> budgetService.createOrUpdateBudget(user, "UNKNOWN", new BigDecimal("100.00")));
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                budgetService.createOrUpdateBudget(user, "UNKNOWN", new BigDecimal("100.00"))
+        );
+
         assertTrue(exception.getMessage().contains("Category not found"));
     }
 
     @Test
     void testCreateBudgetForNewCategory() {
-        when(categoryRepository.findByName("FOOD")).thenReturn(Optional.of(category));
-        when(budgetRepository.findByUserIdAndCategoryId(1L, 10L)).thenReturn(Optional.empty());
-
-        Budget savedBudget = new Budget(user, category, new BigDecimal("150.00"));
+        BigDecimal amount = new BigDecimal("150.00");
+        Budget savedBudget = new Budget(user, category, amount);
         savedBudget.setId(200L);
+
+        when(categoryRepository.findByName(category.getName())).thenReturn(Optional.of(category));
+        when(budgetRepository.findByUserIdAndCategoryId(user.getId(), category.getId())).thenReturn(Optional.empty());
         when(budgetRepository.save(any(Budget.class))).thenReturn(savedBudget);
         when(expenseRepository.findAll()).thenReturn(List.of());
 
-        BudgetResponse response = budgetService.createOrUpdateBudget(user, "FOOD", new BigDecimal("150.00"));
+        BudgetResponse response = budgetService.createOrUpdateBudget(user, category.getName(), amount);
 
         assertNotNull(response);
-        assertEquals(200L, response.getId());
-        assertEquals("FOOD", response.getCategory());
-        assertEquals(new BigDecimal("150.00"), response.getLimit());
+        assertEquals(savedBudget.getId(), response.getId());
+        assertEquals(category.getName(), response.getCategory());
+        assertEquals(amount, response.getLimit());
         assertEquals(BigDecimal.ZERO, response.getSpent());
-        assertEquals(new BigDecimal("150.00"), response.getRemaining());
+        assertEquals(amount, response.getRemaining());
         verify(budgetRepository).save(any(Budget.class));
     }
 
     @Test
     void testUpdateBudgetForExistingCategory() {
-        Budget existingBudget = new Budget(user, category, new BigDecimal("100.00"));
+        BigDecimal oldAmount = new BigDecimal("100.00");
+        BigDecimal newAmount = new BigDecimal("250.00");
+        Budget existingBudget = new Budget(user, category, oldAmount);
         existingBudget.setId(200L);
 
-        when(categoryRepository.findByName("FOOD")).thenReturn(Optional.of(category));
-        when(budgetRepository.findByUserIdAndCategoryId(1L, 10L)).thenReturn(Optional.of(existingBudget));
+        when(categoryRepository.findByName(category.getName())).thenReturn(Optional.of(category));
+        when(budgetRepository.findByUserIdAndCategoryId(user.getId(), category.getId())).thenReturn(Optional.of(existingBudget));
         when(budgetRepository.save(existingBudget)).thenReturn(existingBudget);
         when(expenseRepository.findAll()).thenReturn(List.of());
 
-        BudgetResponse response = budgetService.createOrUpdateBudget(user, "FOOD", new BigDecimal("250.00"));
+        BudgetResponse response = budgetService.createOrUpdateBudget(user, category.getName(), newAmount);
 
-        assertEquals(new BigDecimal("250.00"), response.getLimit());
-        assertEquals(new BigDecimal("250.00"), existingBudget.getAmount());
+        assertEquals(newAmount, response.getLimit());
+        assertEquals(newAmount, existingBudget.getAmount());
         verify(budgetRepository).save(existingBudget);
     }
 
@@ -136,18 +151,22 @@ public class BudgetServiceTest {
         Budget budget = new Budget(user, category, new BigDecimal("100.00"));
         budget.setId(300L);
 
-        when(budgetRepository.findById(300L)).thenReturn(Optional.of(budget));
+        when(budgetRepository.findById(budget.getId())).thenReturn(Optional.of(budget));
 
-        budgetService.deleteBudget(user, 300L);
+        budgetService.deleteBudget(user, budget.getId());
 
         verify(budgetRepository).delete(budget);
     }
 
     @Test
     void testDeleteBudgetThrowsWhenNotFound() {
-        when(budgetRepository.findById(999L)).thenReturn(Optional.empty());
+        Long nonExistentId = 999L;
+        when(budgetRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> budgetService.deleteBudget(user, 999L));
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                budgetService.deleteBudget(user, nonExistentId)
+        );
+
         assertEquals("Budget not found", exception.getMessage());
         verify(budgetRepository, never()).delete(any());
     }
@@ -158,9 +177,12 @@ public class BudgetServiceTest {
         Budget budget = new Budget(otherUser, category, new BigDecimal("100.00"));
         budget.setId(300L);
 
-        when(budgetRepository.findById(300L)).thenReturn(Optional.of(budget));
+        when(budgetRepository.findById(budget.getId())).thenReturn(Optional.of(budget));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> budgetService.deleteBudget(user, 300L));
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                budgetService.deleteBudget(user, budget.getId())
+        );
+
         assertEquals("Access denied", exception.getMessage());
         verify(budgetRepository, never()).delete(any());
     }

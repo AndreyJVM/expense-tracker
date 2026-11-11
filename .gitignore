@@ -21,4 +21,5 @@ thumbs.db
 /target/
 
 # For local development
+.env
 docker-compose.override.yml
