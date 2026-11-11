@@ -381,13 +381,17 @@ function setupSettingsUI() {
 }
 
 function applyTheme() {
-  const iconElem = document.getElementById("theme-toggle-icon");
+  const sun = document.getElementById("theme-icon-sun");
+  const moon = document.getElementById("theme-icon-moon");
+
   if (currentTheme === "dark") {
     document.documentElement.classList.add("dark");
-    if (iconElem) iconElem.textContent = "☀️";
+    sun?.classList.remove("hidden");
+    moon?.classList.add("hidden");
   } else {
     document.documentElement.classList.remove("dark");
-    if (iconElem) iconElem.textContent = "🌙";
+    sun?.classList.add("hidden");
+    moon?.classList.remove("hidden");
   }
 }
 

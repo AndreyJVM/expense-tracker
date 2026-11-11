@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.felipeaugdev.dto.BudgetResponse;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 public class BudgetServiceTest {
 
     @Mock
