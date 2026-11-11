@@ -1,7 +1,6 @@
 package com.felipeaugdev;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
@@ -18,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 public class RecurringExpenseServiceTest {
 
     @Mock
@@ -42,8 +42,7 @@ public class RecurringExpenseServiceTest {
     @Test
     void testCreateCalculatesNextOccurrenceDateWhenNull() {
         RecurringExpense template = new RecurringExpense(
-                new BigDecimal("50.00"), "Internet", category, 30, null, user
-        );
+                new BigDecimal("50.00"), "Internet", category, 30, null, user);
         when(recurringRepository.save(template)).thenReturn(template);
 
         RecurringExpense created = recurringExpenseService.create(template);
@@ -58,8 +57,7 @@ public class RecurringExpenseServiceTest {
     void testCreatePreservesExistingNextOccurrenceDate() {
         LocalDate customDate = LocalDate.now().plusDays(10);
         RecurringExpense template = new RecurringExpense(
-                new BigDecimal("50.00"), "Internet", category, 30, customDate, user
-        );
+                new BigDecimal("50.00"), "Internet", category, 30, customDate, user);
         when(recurringRepository.save(template)).thenReturn(template);
 
         RecurringExpense created = recurringExpenseService.create(template);
@@ -81,8 +79,7 @@ public class RecurringExpenseServiceTest {
     @Test
     void testDeactivateSuccessWhenOwnerMatches() {
         RecurringExpense template = new RecurringExpense(
-                new BigDecimal("15.00"), "Streaming", category, 30, LocalDate.now(), user
-        );
+                new BigDecimal("15.00"), "Streaming", category, 30, LocalDate.now(), user);
         template.setId(10L);
         when(recurringRepository.findById(10L)).thenReturn(Optional.of(template));
 
@@ -96,8 +93,7 @@ public class RecurringExpenseServiceTest {
     void testDeactivateIgnoredWhenUserDoesNotMatch() {
         User otherUser = new User(2L, "jane", "password", "USER");
         RecurringExpense template = new RecurringExpense(
-                new BigDecimal("15.00"), "Streaming", category, 30, LocalDate.now(), otherUser
-        );
+                new BigDecimal("15.00"), "Streaming", category, 30, LocalDate.now(), otherUser);
         template.setId(10L);
         when(recurringRepository.findById(10L)).thenReturn(Optional.of(template));
 
@@ -111,8 +107,7 @@ public class RecurringExpenseServiceTest {
     void testGenerateDueExpensesCreatesExpenseAndAdvancesDate() {
         LocalDate today = LocalDate.now();
         RecurringExpense template = new RecurringExpense(
-                new BigDecimal("100.00"), "Gym", category, 30, today, user
-        );
+                new BigDecimal("100.00"), "Gym", category, 30, today, user);
         template.setId(15L);
 
         when(recurringRepository.findByActiveTrueAndNextOccurrenceDateLessThanEqual(today))
