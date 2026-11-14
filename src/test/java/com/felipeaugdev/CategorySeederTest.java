@@ -26,7 +26,7 @@ public class CategorySeederTest {
 
     @Test
     void testRunSeedsAllDefaultsWhenRepositoryIsEmpty() {
-        when(categoryRepository.findByName(anyString())).thenReturn(Optional.empty());
+        when(categoryRepository.findByNameAndUserIsNull(anyString())).thenReturn(Optional.empty());
 
         categorySeeder.run();
 
@@ -46,8 +46,9 @@ public class CategorySeederTest {
 
     @Test
     void testRunSkipsExistingCategories() {
-        when(categoryRepository.findByName("FOOD")).thenReturn(Optional.of(new Category("FOOD")));
-        when(categoryRepository.findByName(argThat(name -> !"FOOD".equals(name)))).thenReturn(Optional.empty());
+        when(categoryRepository.findByNameAndUserIsNull("FOOD")).thenReturn(Optional.of(new Category("FOOD")));
+        when(categoryRepository.findByNameAndUserIsNull(argThat(name -> !"FOOD".equals(name))))
+                .thenReturn(Optional.empty());
 
         categorySeeder.run();
 
@@ -65,7 +66,7 @@ public class CategorySeederTest {
 
     @Test
     void testRunDoesNothingWhenAllCategoriesAlreadyExist() {
-        when(categoryRepository.findByName(anyString()))
+        when(categoryRepository.findByNameAndUserIsNull(anyString()))
                 .thenAnswer(invocation -> Optional.of(new Category(invocation.getArgument(0))));
 
         categorySeeder.run();

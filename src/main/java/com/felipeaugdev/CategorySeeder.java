@@ -20,7 +20,7 @@ public class CategorySeeder implements CommandLineRunner {
         };
 
         for (String name : defaults) {
-            if (categoryRepository.findByName(name).isEmpty()) {
+            if (categoryRepository.findByNameAndUserIsNull(name).isEmpty()) {
                 categoryRepository.save(new Category(name));
             }
         }

@@ -37,7 +37,7 @@ public class ExpenseService {
     public Expense addExpense(BigDecimal amount, String description, String categoryName,
             User user, boolean recurring, Integer frequencyDays, LocalDate date) {
 
-        Category category = categoryRepository.findByName(categoryName)
+        Category category = categoryRepository.findVisibleByName(categoryName, user)
                 .orElseThrow(() -> new RuntimeException("Category not found: " + categoryName));
 
         LocalDate expenseDate = (date != null) ? date : LocalDate.now();
@@ -99,7 +99,7 @@ public class ExpenseService {
             expense.setDescription(request.getDescription());
         }
         if (request.getCategory() != null) {
-            Category category = categoryRepository.findByName(request.getCategory())
+            Category category = categoryRepository.findVisibleByName(request.getCategory(), currentUser)
                     .orElseThrow(() -> new RuntimeException("Category not found: " + request.getCategory()));
 
             expense.setCategory(category);
@@ -279,8 +279,7 @@ public class ExpenseService {
                 }
 
                 boolean categoryExists = categoryRepository
-                        .findByName(categoryName)
-                        .filter(c -> c.getUser() == null || (user != null && c.getUser().getId().equals(user.getId())))
+                        .findVisibleByName(categoryName, user)
                         .isPresent();
 
                 String finalCategory = categoryExists ? categoryName : "OTHER";

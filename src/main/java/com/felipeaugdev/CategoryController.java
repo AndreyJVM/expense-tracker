@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.felipeaugdev.dto.CategoryRequest;
 import com.felipeaugdev.dto.CategoryResponse;
@@ -77,15 +78,20 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryResponse createCategory(@Valid @RequestBody CategoryRequest request) {
         User currentUser = getCurrentUser();
-
         if (currentUser == null) {
-            throw new RuntimeException("You must be logged in to create a category");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You must be logged in to create a category");
         }
 
         String name = request.getName().trim().toUpperCase();
-        Category category = new Category(name, currentUser);
-        Category saved = categoryRepository.save(category);
 
+        if (categoryRepository.findByNameAndUserIsNull(name).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "This category name is reserved");
+        }
+        if (categoryRepository.findByNameAndUserId(name, currentUser.getId()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You already have a category with this name");
+        }
+
+        Category saved = categoryRepository.save(new Category(name, currentUser));
         return CategoryResponse.from(saved);
     }
 }

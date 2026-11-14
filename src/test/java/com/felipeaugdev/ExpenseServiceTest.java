@@ -35,7 +35,7 @@ public class ExpenseServiceTest {
     @Test
     void testAddExpenseSavesAndReturnsExpense() {
         Expense sample = new Expense(new BigDecimal("5.50"), LocalDate.now(), "Coffee", food);
-        when(categoryRepository.findByName("FOOD")).thenReturn(Optional.of(food));
+        when(categoryRepository.findVisibleByName(eq("FOOD"), any())).thenReturn(Optional.of(food));
         when(repository.save(any(Expense.class))).thenReturn(sample);
 
         Expense created = service.addExpense(new BigDecimal("5.50"), "Coffee", "FOOD", null, false, null, null);

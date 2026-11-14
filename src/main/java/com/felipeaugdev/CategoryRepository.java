@@ -9,7 +9,17 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    Optional<Category> findByName(String name);
+    Optional<Category> findByNameAndUserIsNull(String name);
+
+    Optional<Category> findByNameAndUserId(String name, Long userId);
+
+    default Optional<Category> findVisibleByName(String name, User user) {
+        Optional<Category> system = findByNameAndUserIsNull(name);
+        if (system.isPresent() || user == null) {
+            return system;
+        }
+        return findByNameAndUserId(name, user.getId());
+    }
 
     List<Category> findByUserIsNull();
 

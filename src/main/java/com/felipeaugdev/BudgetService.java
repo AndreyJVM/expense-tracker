@@ -54,7 +54,7 @@ public class BudgetService {
             throw new RuntimeException("You must be logged in to set a budget");
         }
 
-        Category category = categoryRepository.findByName(categoryName)
+        Category category = categoryRepository.findVisibleByName(categoryName, user)
                 .orElseThrow(() -> new RuntimeException("Category not found: " + categoryName));
 
         Budget budget = budgetRepository

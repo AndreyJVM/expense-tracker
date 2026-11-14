@@ -87,20 +87,18 @@ public class BudgetServiceTest {
 
     @Test
     void testCreateOrUpdateBudgetThrowsWhenUserIsNull() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                budgetService.createOrUpdateBudget(null, "FOOD", new BigDecimal("100.00"))
-        );
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> budgetService.createOrUpdateBudget(null, "FOOD", new BigDecimal("100.00")));
 
         assertEquals("You must be logged in to set a budget", exception.getMessage());
     }
 
     @Test
     void testCreateOrUpdateBudgetThrowsWhenCategoryNotFound() {
-        when(categoryRepository.findByName("UNKNOWN")).thenReturn(Optional.empty());
+        when(categoryRepository.findVisibleByName("UNKNOWN", user)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                budgetService.createOrUpdateBudget(user, "UNKNOWN", new BigDecimal("100.00"))
-        );
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> budgetService.createOrUpdateBudget(user, "UNKNOWN", new BigDecimal("100.00")));
 
         assertTrue(exception.getMessage().contains("Category not found"));
     }
@@ -111,7 +109,7 @@ public class BudgetServiceTest {
         Budget savedBudget = new Budget(user, category, amount);
         savedBudget.setId(200L);
 
-        when(categoryRepository.findByName(category.getName())).thenReturn(Optional.of(category));
+        when(categoryRepository.findVisibleByName(category.getName(), user)).thenReturn(Optional.of(category));
         when(budgetRepository.findByUserIdAndCategoryId(user.getId(), category.getId())).thenReturn(Optional.empty());
         when(budgetRepository.save(any(Budget.class))).thenReturn(savedBudget);
         when(expenseRepository.findAll()).thenReturn(List.of());
@@ -134,8 +132,9 @@ public class BudgetServiceTest {
         Budget existingBudget = new Budget(user, category, oldAmount);
         existingBudget.setId(200L);
 
-        when(categoryRepository.findByName(category.getName())).thenReturn(Optional.of(category));
-        when(budgetRepository.findByUserIdAndCategoryId(user.getId(), category.getId())).thenReturn(Optional.of(existingBudget));
+        when(categoryRepository.findVisibleByName(category.getName(), user)).thenReturn(Optional.of(category));
+        when(budgetRepository.findByUserIdAndCategoryId(user.getId(), category.getId()))
+                .thenReturn(Optional.of(existingBudget));
         when(budgetRepository.save(existingBudget)).thenReturn(existingBudget);
         when(expenseRepository.findAll()).thenReturn(List.of());
 
@@ -163,9 +162,8 @@ public class BudgetServiceTest {
         Long nonExistentId = 999L;
         when(budgetRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                budgetService.deleteBudget(user, nonExistentId)
-        );
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> budgetService.deleteBudget(user, nonExistentId));
 
         assertEquals("Budget not found", exception.getMessage());
         verify(budgetRepository, never()).delete(any());
@@ -179,9 +177,8 @@ public class BudgetServiceTest {
 
         when(budgetRepository.findById(budget.getId())).thenReturn(Optional.of(budget));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                budgetService.deleteBudget(user, budget.getId())
-        );
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> budgetService.deleteBudget(user, budget.getId()));
 
         assertEquals("Access denied", exception.getMessage());
         verify(budgetRepository, never()).delete(any());
