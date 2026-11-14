@@ -321,7 +321,10 @@ document.addEventListener("DOMContentLoaded", () => {
           body: JSON.stringify({ name }),
         });
 
-        if (!response.ok) throw new Error("Failed to create category");
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.message || "Failed to create category");
+        }
 
         const newCategory = await response.json();
 
