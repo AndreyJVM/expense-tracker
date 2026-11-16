@@ -13,6 +13,16 @@ This expense tracker was built primarily with Java. It uses Spring Boot and JPA 
 
 ## Dev Log
 
+### [November 14 2026] - Bugfix: Scope Category Lookups to the Current User
+* **The issue:** Two users couldn't create custom categories with the same name. `categories.name` had a global unique constraint, so the database rejected the second insert.
+* **Why not just drop the constraint:** `CategoryRepository.findByName` returns a single `Optional<Category>`. Once two users own a category with the same name, it matches two rows and throws, which would break expense creation, CSV import and budgets. Categories were being identified by name alone.
+* **The fix:**
+  * Replaced the unique constraint on `name` with a composite unique constraint on `(name, user_id)`.
+  * Removed `findByName`; added `findByNameAndUserIsNull`, `findByNameAndUserId` and a `findVisibleByName(name, user)` default method (system category first, then the user's own). Updated `ExpenseService`, `BudgetService` and `CategorySeeder`.
+  * `createCategory` now rejects reserved and duplicate names with 401/409. A new `ResponseStatusException` handler lets the front-end show the server's message.
+  * Updated the affected tests.
+* **Lesson learned:** Hibernate can add constraints but never remove them, which is why Flyway is on the roadmap. Also, identify records by id, or by name plus owner, never by name alone.
+
 ### [November 12–13 2026] - Export / Import and Toast Notifications
 * **What changed:** Added the ability to export and import expenses in CSV format. Also added a new toast notification system that can be reused to display alerts such as successful operations, errors, information, etc.
 * **Why:** Being able to export and import expenses is good for portability and backups. All information is preserved, so you don't lose any data (nonexistent custom categories fall back to "Other"). Toast notifications replace the old browser alerts for a cleaner, more modern feedback experience.
