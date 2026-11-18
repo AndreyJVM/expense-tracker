@@ -1,27 +1,11 @@
 package com.felipeaugdev.integration;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.ResultActions;
 
-@SuppressWarnings("null")
 class CategoryIntegrationTest extends AbstractIntegrationTest {
-
-    private ResultActions createCategory(String token, String name) throws Exception {
-        var request = post("/api/categories")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(Map.of("name", name)));
-        if (token != null) {
-            request.header("Authorization", "Bearer " + token);
-        }
-        return mockMvc.perform(request);
-    }
 
     @Test
     void twoUsersCanCreateCategoriesWithTheSameName() throws Exception {
